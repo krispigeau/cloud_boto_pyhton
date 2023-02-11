@@ -62,6 +62,7 @@ def create_instance(ID):
         ]
     )
 
+    # Print statment can be used also used for different min/max values
     for instance in instances:
         print(f'The Instance ID is {instance.id}', 
             f'In the Subnet {instance.subnet_id} '
@@ -71,6 +72,8 @@ def create_instance(ID):
 print('Create EC2 Instances')
 print('----------------')
 
+
+# Loop through the list of subnet IDs and call the create function
 for subID in subnetIDs:
     create_instance(subID)
     
