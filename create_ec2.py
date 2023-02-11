@@ -19,5 +19,8 @@ def create_instance():
 # The created instances ID are printed:
  for n in range(quantity):
     print(instances["Instances"][n]["InstanceId"])
- 
+    print(type(instances))
+    print(isinstance(instances))
+    
 create_instance()
+
