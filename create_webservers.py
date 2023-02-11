@@ -67,6 +67,10 @@ def create_instance(ID):
             f'In the Subnet {instance.subnet_id} '
             f'with Private IP {instance.private_ip_address}')
 
+# Print output output header
+print('Create EC2 Instances')
+print('----------------')
+
 for subID in subnetIDs:
     create_instance(subID)
     
