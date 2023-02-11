@@ -17,13 +17,21 @@ subnetIDs = []
 for subnet in response['Subnets']:
     subnetIDs.append(subnet['SubnetId'])
 
+# Define a function to create an ec2 instance
+
 def create_instance(ID):
     KEY_PAIR_NAME = "kris_desktop"
     AMI_ID = 'ami-0c02fb55956c7d316' # Amazon Linux 2
     SUBNET_ID = ID
     SECURITY_GROUP_ID = "sg-0135c8e5aa0fb0553"
     USER_DATA = '''#!/bin/bash
-    yum update
+    yum update -y
+    yum install httpd -y
+    cd /var/www/html
+    echo "<html><body><h1> Hello from Kris Pigeau at \
+    $(hostname -f) </html></body></h1>" > index.html
+    systemctl restart httpd
+    systemctl enable httpd
     '''
     EC2_RESOURCE = boto3.resource("ec2", region_name="us-east-1")
     instances = EC2_RESOURCE.create_instances(
