@@ -2,25 +2,31 @@
 import boto3
 
 
-# create ec2 client instance to get subnet ids
-ec2_client = boto3.client('ec2')
+# Instantiate a ec2 service resource object
+ec2_resource = boto3.resource('ec2')
 
 
-# Set values to be use in filter, for eaiser readability
-filter_values={"Name":"default-for-az","Values":["true"]}
+# create an iterator that hold info for all vpcs
+vpc_iterator = ec2_resource.vpcs.all()
 
 
-# use the descibe_subnet method and filter for default subnets
-response=ec2_client.describe_subnets(Filters=[filter_values])
+# Loop through iterator to find default vpc and store id into variable
+for vpc in vpc_iterator:
+    if vpc.is_default:
+        default_vpc_id = vpc.id
+        
 
-
-# Create list to hold subnet IDs
-subnetIDs = []
-
-
-# Add subnet IDs to list
-for subnet in response['Subnets']:
-    subnetIDs.append(subnet['SubnetId'])
+# create a subnet_iterator that uses default_vpc_id variable in filter
+subnet_iterator = ec2_resource.subnets.filter(
+    Filters=[
+        {
+            'Name': 'vpc-id',
+            'Values': [
+                default_vpc_id,
+            ]
+        },
+    ]
+)
 
 
 # Define a function to create an ec2 instance
@@ -29,7 +35,7 @@ def create_instance(ID):
     KEY_PAIR_NAME = "kris_desktop"
     AMI_ID = 'ami-0c02fb55956c7d316' # Amazon Linux 2
     SUBNET_ID = ID # takes argument passed when calling function
-    SECURITY_GROUP_ID = "sg-0135c8e5aa0fb0553"
+    SECURITY_GROUP_ID = "sg-0135c8e5aa0fb0553" # uses demo-sg
     USER_DATA = '''#!/bin/bash
     yum update -y
     yum install httpd -y
@@ -68,12 +74,13 @@ def create_instance(ID):
             f'In the Subnet {instance.subnet_id} '
             f'with Private IP {instance.private_ip_address}')
 
+
 # Print output output header
 print('Create EC2 Instances')
 print('----------------')
 
 
-# Loop through the list of subnet IDs and call the create function
-for subID in subnetIDs:
-    create_instance(subID)
+# Loop through subnet_iterator passing the return from subnet.id as the ID
+for subnet in subnet_iterator:
+    create_instance(subnet.id)
     
